@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>sload</title>
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1pbmZpbml0eS1pY29uIGx1Y2lkZS1pbmZpbml0eSI+PHBhdGggZD0iTTYgMTZjNSAwIDctOCAxMi04YTQgNCAwIDAgMSAwIDhjLTUgMC03LTgtMTItOGE0IDQgMCAxIDAgMCA4Ii8+PC9zdmc+" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1pbmZpbml0eS1pY29uIGx1Y2lkZS1pbmZpbml0eSI+PHBhdGggZD0iTTYgMTZjNSAwIDctOCAxMi04YTQgNCAwIDAgMSAwIDhjLTUgMC03LTgtMTItOGE0IDQgMCAxIDAgMCA4Ii8+PC9zdmc+" media="(prefers-color-scheme: dark)">
+  <style>
+    body {
+      background: #111;
+      color: #eee;
+      font-family: monospace;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+    label, input, button, select {
+      font-family: inherit;
+      margin-right: 10px;
+      margin-top: 8px;
+    }
+    input, select {
+      padding: 6px;
+      background: #222;
+      border: 1px solid #444;
+      color: #fff;
+      width: 130px;
+    }
+    input[type="text"] {
+      width: 60%;
+    }
+    button {
+      padding: 8px 16px;
+      background: #222;
+      border: 1px solid #444;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .blue { color: #00afff; }
+    .green { color: #00ff88; }
+    .red { color: #ff5555; }
+    .yellow { color: #ffff55; }
+    pre {
+      margin-top: 20px;
+      padding: 20px;
+      white-space: pre-wrap;
+    }
+    #progressBar {
+      font-weight: bold;
+      color: #00afff;
+    }
+
+  #customAlert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #222;
+    color: #eee;
+    border: 1px solid #444;
+    padding: 15px 25px;
+    font-family: monospace;
+    font-size: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 300px;
+  }
+  #customAlert.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+.checkbox-container {
+  display: inline-block;
+  position: relative;
+  user-select: none;
+}
+
+#noCors {
+  display: none; /* ẩn checkbox gốc */
+}
+
+/* Label làm thành nút bấm */
+.toggle-label {
+  display: inline-block;
+  padding: 6px 20px;
+  border: 1px solid #444;
+  background-color: #222;
+  color: #eee;
+  font-family: monospace;
+  font-size: 16px;
+  cursor: pointer;
+  width: 60px;
+  text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Text mặc định là NO */
+.toggle-text::before {
+  content: "No";
+}
+
+/* Khi checkbox checked, đổi text thành YES và style khác */
+#noCors:checked + .toggle-label {
+  background-color: #00afff;
+  color: #111;
+}
+
+#noCors:checked + .toggle-label .toggle-text::before {
+  content: "Yes";
+}
+
+/* Ẩn mũi tên mặc định trên select và input type="number" */
+select::-ms-expand {
+    display: none;
+}
+select {
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23b0b0b0%22%20d%3D%22M287%20197.8L154.4%2065.2c-4.4-4.4-11.4-4.4-15.8%200L5.4%20197.8c-4.4%204.4-4.4%2011.4%200%2015.8l15.8%2015.8c4.4%204.4%2011.4%204.4%2015.8%200L146.5%20121l111.4%20111.4c4.4%204.4%2011.4%204.4%2015.8%200l15.8-15.8c4.4-4.4%204.4-11.4%200-15.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 12px;
+}
+
+
+input[type="number"]::-webkit-inner-spin-button, 
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+
+/* Kiểu dáng cho các trường input và select */
+select, input[type="number"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+  </style>
+</head>
+<body>
+
+<div id="customAlert" role="alert" aria-live="assertive">
+  <span id="alertMessage"></span>
+</div>
+
+  <div>
+    <label for="url">🎯 URL mục tiêu:</label>
+    <input type="text" id="url" value="https://httpbin.org" />
+  </div>
+
+  <div>
+    <label for="rate">⚡ Rate (req/s):</label>
+    <input type="number" id="rate" value="2" min="1" />
+    
+    <label for="threads">🔧 Threads:</label>
+    <input type="number" id="threads" value="4" min="1" />
+    
+    <label for="duration">⏳ Duration (s):</label>
+    <input type="number" id="duration" value="30" min="1" />
+  </div>
+
+  <div>
+    <label for="method">📝 Method:</label>
+    <select id="method">
+      <option value="GET" selected>GET</option>
+      <option value="POST">POST</option>
+    </select>
+  </div>
+
+<div class="checkbox-container">
+  <input type="checkbox" id="noCors" />
+  <label for="noCors" class="toggle-label">nocors
+    <span class="toggle-text"></span>
+  </label>
+</div>
+
+
+
+  <button onclick="start()">Bắt đầu</button>
+  <button onclick="stop()" style="margin-left: 10px;">Dừng</button>
+
+  <div id="currentUrl" class="blue" style="margin-top: 20px; font-weight: bold;"></div>
+
+  <pre id="output"></pre>
+
+  <script>
+const noCors = document.getElementById('noCors').checked;
+
+  const customAlert = document.getElementById('customAlert');
+  const alertMessage = document.getElementById('alertMessage');
+  let alertTimeout;
+
+  function showAlert(message, duration = 3000) {
+    clearTimeout(alertTimeout);
+    alertMessage.textContent = message;
+    customAlert.classList.add('show');
+    alertTimeout = setTimeout(() => {
+      customAlert.classList.remove('show');
+    }, duration);
+  }
+
+
+    let intervalId;
+    let total = 0;
+    let success = 0;
+    let failed = 0;
+
+    function start() {
+      if (intervalId) {
+        showAlert('Đang chạy rồi, vui lòng dừng trước khi bắt đầu lại!');
+        return;
+      }
+
+      const url = document.getElementById('url').value;
+      const rate = Math.max(1, Number(document.getElementById('rate').value));
+      const threads = Math.max(1, Number(document.getElementById('threads').value));
+      const duration = Math.max(1, Number(document.getElementById('duration').value));
+      const method = document.getElementById('method').value;
+      const output = document.getElementById('output');
+      const currentUrl = document.getElementById('currentUrl');
+      output.innerHTML = '';
+      currentUrl.textContent = '🔗 URL hiện tại: ' + url;
+
+      total = 0;
+      success = 0;
+      failed = 0;
+
+      const startTime = Date.now();
+
+      function logStats(elapsed) {
+        const remaining = duration - elapsed;
+        const successRate = total > 0 ? ((success / total) * 100).toFixed(1) : 0;
+        const barLength = 40;
+        const percent = Math.min(elapsed / duration, 1);
+const done = Math.floor(barLength * percent);
+const empty = Math.max(0, barLength - done - 1);
+const progress = '[' + '■'.repeat(done) + '■' + '□'.repeat(empty) + ']';
+
+
+        output.innerHTML = `
+<span class="blue">🎯 Target:</span> ${url} : ${elapsed}s / ${duration}s
+<span class="blue">⏳ Remaining:</span> ${remaining}s
+<span class="blue">🔧 Config:</span> Rate: ${rate}/s | Threads: ${threads} | Method: ${method}
+
+<span class="green">📊 Statistics:</span>
+<span class="green">    ✅ Success:</span> ${success}
+<span class="red">    ❌ Failed:</span> ${failed}
+<span class="blue">    📈 Total:</span> ${total}
+<span class="yellow">    ⚡ Rate:</span> ${(total / (elapsed || 1)).toFixed(2)} req/s
+<span class="green">    ✓ Success Rate:</span> ${successRate}%
+
+<span id="progressBar" class="blue">${progress}</span>
+        `;
+      }
+
+  intervalId = setInterval(() => {
+    const noCors = document.getElementById('noCors').checked; // Lấy trạng thái checkbox mới nhất tại mỗi lần gửi request
+
+    for (let i = 0; i < threads; i++) {
+      fetch(url, {
+        method: method,
+        mode: noCors ? 'no-cors' : 'cors',  // Sử dụng đúng trạng thái
+        headers: { 'Content-Type': 'application/json' },
+        body: method === 'POST' ? JSON.stringify({ test: "data" }) : null,
+	"User-Agent": "node"
+      })
+      .then(() => { success++; total++; })
+      .catch(() => { failed++; total++; });
+    }
+
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        logStats(elapsed);
+
+if (elapsed >= duration) {
+  clearInterval(intervalId);
+  intervalId = null;
+  stop();
+}
+      }, 1000 / rate);
+    }
+
+function stop() {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+    const output = document.getElementById('output');
+    output.innerHTML += '\n\n[Đã dừng chạy]\n';
+  }
+}
+
+  </script>
+
+</body>
+</html>
