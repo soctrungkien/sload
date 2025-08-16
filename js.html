@@ -1,0 +1,98 @@
+<script>
+document.body.style = "font-family: Arial; margin: 20px; background: #f0f0f0;";
+
+const container = document.createElement("div");
+container.style = "max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px #ccc;";
+document.body.appendChild(container);
+
+// Tiêu đề
+const title = document.createElement("h2");
+title.innerText = "Công cụ kiểm thử tải (JavaScript)";
+container.appendChild(title);
+
+// Tạo input function
+function createField(labelText, inputId, inputType = "text", defaultValue = "") {
+  const label = document.createElement("label");
+  label.innerText = labelText;
+  label.style = "display: block; margin-top: 10px;";
+  container.appendChild(label);
+
+  const input = document.createElement("input");
+  input.type = inputType;
+  input.id = inputId;
+  input.value = defaultValue;
+  input.style = "padding: 8px; width: 100%; margin-top: 4px;";
+  container.appendChild(input);
+}
+
+// Tạo các trường
+createField("🔗 URL:", "url", "text", "https://httpbin.org/get");
+createField("⚙️ Số request/giây:", "rps", "number", "5");
+createField("⏱️ Thời gian kiểm thử (giây):", "duration", "number", "10");
+
+// Phương thức
+const methodLabel = document.createElement("label");
+methodLabel.innerText = "📡 Phương thức:";
+methodLabel.style = "display: block; margin-top: 10px;";
+container.appendChild(methodLabel);
+
+const methodSelect = document.createElement("select");
+methodSelect.id = "method";
+methodSelect.style = "padding: 8px; width: 100%; margin-top: 4px;";
+["GET", "POST"].forEach(method => {
+  const opt = document.createElement("option");
+  opt.value = method;
+  opt.innerText = method;
+  methodSelect.appendChild(opt);
+});
+container.appendChild(methodSelect);
+
+// Nút bắt đầu
+const btn = document.createElement("button");
+btn.innerText = "🚀 Bắt đầu kiểm thử";
+btn.style = "margin-top: 15px; padding: 10px; width: 100%; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;";
+btn.onclick = startTest;
+container.appendChild(btn);
+
+// Kết quả
+const resultDiv = document.createElement("div");
+resultDiv.style = "margin-top: 20px; padding: 10px; background: #eef; border: 1px solid #aac; min-height: 60px;";
+container.appendChild(resultDiv);
+
+// Hàm kiểm thử tải
+function startTest() {
+  const url = document.getElementById("url").value;
+  const rps = parseInt(document.getElementById("rps").value);
+  const duration = parseInt(document.getElementById("duration").value);
+  const method = document.getElementById("method").value;
+
+  const total = rps * duration;
+  let success = 0;
+  let failed = 0;
+
+  resultDiv.innerHTML = "⏳ Đang gửi request...";
+
+  for (let i = 0; i < total; i++) {
+    setTimeout(() => {
+      fetch(url, { method: method })
+        .then(res => {
+          if (res.ok) success++;
+          else failed++;
+          updateResult(success, failed, total);
+        })
+        .catch(() => {
+          failed++;
+          updateResult(success, failed, total);
+        });
+    }, (i * 1000) / rps);
+  }
+}
+
+function updateResult(success, failed, total) {
+  resultDiv.innerHTML = `
+    ✅ Thành công: ${success} <br>
+    ❌ Thất bại: ${failed} <br>
+    🔄 Đã gửi: ${success + failed} / ${total}
+  `;
+}
+</script>

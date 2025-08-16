@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kiểm thử tải (Load Testing Tool)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      margin-top: 5px;
+      padding: 5px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    #stats {
+      margin-top: 20px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      max-width: 600px;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+
+    #controls {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Công cụ kiểm thử tải đơn giản</h1>
+
+  <!-- Nhập URL cần kiểm thử -->
+  <label for="url">URL:</label>
+  <input type="text" id="url" placeholder="https://example.com/api" />
+
+  <!-- Chọn số request mỗi giây -->
+  <label for="requestsPerSecond">Số request/giây:</label>
+  <input type="number" id="requestsPerSecond" value="10" min="1" />
+
+  <!-- Chọn số luồng chạy song song -->
+  <label for="threads">Số luồng (threads):</label>
+  <input type="number" id="threads" value="1" min="1" />
+
+  <!-- Thời gian chạy -->
+  <label for="duration">Thời gian chạy (giây):</label>
+  <input type="number" id="duration" value="10" min="1" />
+
+  <!-- Phương thức HTTP -->
+  <label for="method">Phương thức:</label>
+  <select id="method">
+    <option value="GET">GET</option>
+    <option value="POST">POST</option>
+  </select>
+
+  <!-- Tùy chọn không kiểm tra CORS (chỉ có tác dụng giả định, không vượt được CORS thực sự) -->
+  <label>
+    <input type="checkbox" id="no-cors" />
+    Bỏ qua kiểm tra CORS (No CORS)
+  </label>
+
+  <!-- Khu vực điều khiển -->
+  <div id="controls">
+    <button onclick="startTest()">Bắt đầu</button>
+    <button onclick="stopTest()">Dừng</button>
+  </div>
+
+  <!-- Kết quả thống kê -->
+  <div id="stats">
+    <p class="success">✅ Thành công: <span id="success">0</span></p>
+    <p class="error">❌ Thất bại: <span id="failure">0</span></p>
+  </div>
+
+  <script>
+    let running = false;
+    let successCount = 0;
+    let failureCount = 0;
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function sendRequest(url, method, options) {
+      try {
+        const response = await fetch(url, {
+          method,
+          mode: options.noCors ? 'no-cors' : 'cors'
+        });
+
+        if (!options.noCors && response.ok) {
+          successCount++;
+        } else if (options.noCors) {
+          successCount++; // Trường hợp no-cors thì không thể kiểm tra chính xác kết quả
+        } else {
+          failureCount++;
+        }
+      } catch (error) {
+        failureCount++;
+      }
+
+      // Cập nhật giao diện
+      document.getElementById('success').textContent = successCount;
+      document.getElementById('failure').textContent = failureCount;
+    }
+
+    async function runTestThread(url, method, rps, duration, options) {
+      const interval = 1000 / rps;
+      const endTime = Date.now() + duration * 1000;
+
+      while (running && Date.now() < endTime) {
+        sendRequest(url, method, options);
+        await delay(interval);
+      }
+    }
+
+    function startTest() {
+      const url = document.getElementById('url').value;
+      const rps = parseInt(document.getElementById('requestsPerSecond').value);
+      const threads = parseInt(document.getElementById('threads').value);
+      const duration = parseInt(document.getElementById('duration').value);
+      const method = document.getElementById('method').value;
+      const noCors = document.getElementById('no-cors').checked;
+
+      if (!url) {
+        alert("Vui lòng nhập URL hợp lệ.");
+        return;
+      }
+
+      successCount = 0;
+      failureCount = 0;
+      running = true;
+
+      // Khởi động các luồng chạy đồng thời
+      for (let i = 0; i < threads; i++) {
+        runTestThread(url, method, rps, duration, { noCors });
+      }
+    }
+
+    function stopTest() {
+      running = false;
+    }
+  </script>
+</body>
+</html>
