@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <title>sload</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1pbmZpbml0eS1pY29uIGx1Y2lkZS1pbmZpbml0eSI+PHBhdGggZD0iTTYgMTZjNSAwIDctOCAxMi04YTQgNCAwIDAgMSAwIDhjLTUgMC03LTgtMTItOGE0IDQgMCAxIDAgMCA4Ii8+PC9zdmc+" media="(prefers-color-scheme: light)">
   <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1pbmZpbml0eS1pY29uIGx1Y2lkZS1pbmZpbml0eSI+PHBhdGggZD0iTTYgMTZjNSAwIDctOCAxMi04YTQgNCAwIDAgMSAwIDhjLTUgMC03LTgtMTItOGE0IDQgMCAxIDAgMCA4Ii8+PC9zdmc+" media="(prefers-color-scheme: dark)">
   <style>
@@ -144,159 +145,260 @@ select, input[type="number"] {
     appearance: none;
 }
   </style>
+  <style>
+    body { background:#111; color:#eee; font-family: monospace; padding:20px; max-width:900px; margin:auto; }
+    label,input,button,select,textarea { font-family:inherit; margin:6px 10px 6px 0; }
+    input,select,textarea { padding:6px; background:#222; border:1px solid #444; color:#fff; }
+    input[type="text"]{ width:60%; }
+    input[type="number"]{ width:100px; }
+    button{ padding:8px 12px; background:#222; border:1px solid #444; color:#fff; cursor:pointer; }
+    .blue{ color:#00afff } .green{ color:#00ff88 } .red{ color:#ff5555 } .yellow{ color:#ffff55 }
+    pre{ margin-top:12px; padding:14px; white-space:pre-wrap; background:#0c0c0c; border:1px solid #222; }
+    #customAlert{ position:fixed; top:20px; right:20px; background:#222; color:#eee; padding:12px 16px; border:1px solid #444; opacity:0; transition:opacity .25s; pointer-events:none; }
+    #customAlert.show{ opacity:1; pointer-events:auto; }
+    .small { font-size:13px; color:#bbb; }
+  </style>
 </head>
 <body>
+  <div id="customAlert" role="alert" aria-live="assertive"><span id="alertMessage"></span></div>
 
-<div id="customAlert" role="alert" aria-live="assertive">
-  <span id="alertMessage"></span>
-</div>
+  <h2 class="blue">sload</h2>
+  <p class="small">Chỉ dùng cho kiểm thử hợp pháp (môi trường staging hoặc mục tiêu bạn sở hữu / được phép). Công cụ chạy trong trình duyệt và giới hạn theo cấu hình.</p>
 
   <div>
     <label for="url">🎯 URL mục tiêu:</label>
-    <input type="text" id="url" value="https://httpbin.org" />
+    <input type="text" id="url" value="https://httpbin.org/get" />
   </div>
 
   <div>
     <label for="rate">⚡ Rate (req/s):</label>
     <input type="number" id="rate" value="2" min="1" />
-    
-    <label for="threads">🔧 Threads:</label>
+    <label for="threads">🔧 Threads (concurrency):</label>
     <input type="number" id="threads" value="4" min="1" />
-    
     <label for="duration">⏳ Duration (s):</label>
     <input type="number" id="duration" value="30" min="1" />
   </div>
 
   <div>
     <label for="method">📝 Method:</label>
-    <select id="method">
-      <option value="GET" selected>GET</option>
-      <option value="POST">POST</option>
-    </select>
-  </div>
+    <select id="method"><option>GET</option><option>POST</option></select>
 
+    <label style="margin-left:10px;">
 <div class="checkbox-container">
   <input type="checkbox" id="noCors" />
   <label for="noCors" class="toggle-label">nocors
     <span class="toggle-text"></span>
   </label>
 </div>
+    </label>
+  </div>
 
-
-
-  <button onclick="start()">Bắt đầu</button>
-  <button onclick="stop()" style="margin-left: 10px;">Dừng</button>
-
-  <div id="currentUrl" class="blue" style="margin-top: 20px; font-weight: bold;"></div>
+  <div style="margin-top:8px;">
+    <button id="startBtn">Bắt đầu</button>
+    <button id="stopBtn">Dừng</button>
+    <button id="exportBtn">Xuất CSV</button>
+    <span id="currentUrl" class="blue" style="margin-left:12px;"></span>
+  </div>
 
   <pre id="output"></pre>
 
-  <script>
-const noCors = document.getElementById('noCors').checked;
+<script>
+/*
+  Safe load tester (browser-based)
+  - Implements token-bucket scheduler to match desired rate (req/s)
+  - Limits concurrency to `threads`
+  - Measures latency (ms) per request (when possible)
+  - When no-cors is enabled, response details are not available; we count totals but not success/fail accurately
+*/
 
-  const customAlert = document.getElementById('customAlert');
-  const alertMessage = document.getElementById('alertMessage');
-  let alertTimeout;
+const alertEl = document.getElementById('customAlert');
+const alertMessage = document.getElementById('alertMessage');
+function showAlert(msg, ms=3000){ alertMessage.textContent = msg; alertEl.classList.add('show'); setTimeout(()=>alertEl.classList.remove('show'), ms); }
 
-  function showAlert(message, duration = 3000) {
-    clearTimeout(alertTimeout);
-    alertMessage.textContent = message;
-    customAlert.classList.add('show');
-    alertTimeout = setTimeout(() => {
-      customAlert.classList.remove('show');
-    }, duration);
-  }
+let running = false;
+let state = null;
 
+document.getElementById('startBtn').addEventListener('click', start);
+document.getElementById('stopBtn').addEventListener('click', stop);
+document.getElementById('exportBtn').addEventListener('click', exportCSV);
 
-    let intervalId;
-    let total = 0;
-    let success = 0;
-    let failed = 0;
+function nowMs(){ return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now(); }
 
-    function start() {
-      if (intervalId) {
-        showAlert('Đang chạy rồi, vui lòng dừng trước khi bắt đầu lại!');
-        return;
-      }
-
-      const url = document.getElementById('url').value;
-      const rate = Math.max(1, Number(document.getElementById('rate').value));
-      const threads = Math.max(1, Number(document.getElementById('threads').value));
-      const duration = Math.max(1, Number(document.getElementById('duration').value));
-      const method = document.getElementById('method').value;
-      const output = document.getElementById('output');
-      const currentUrl = document.getElementById('currentUrl');
-      output.innerHTML = '';
-      currentUrl.textContent = '🔗 URL hiện tại: ' + url;
-
-      total = 0;
-      success = 0;
-      failed = 0;
-
-      const startTime = Date.now();
-
-      function logStats(elapsed) {
-        const remaining = duration - elapsed;
-        const successRate = total > 0 ? ((success / total) * 100).toFixed(1) : 0;
-        const barLength = 40;
-        const percent = Math.min(elapsed / duration, 1);
-const done = Math.floor(barLength * percent);
-const empty = Math.max(0, barLength - done - 1);
-const progress = '[' + '■'.repeat(done) + '■' + '□'.repeat(empty) + ']';
-
-
-        output.innerHTML = `
-<span class="blue">🎯 Target:</span> ${url} : ${elapsed}s / ${duration}s
-<span class="blue">⏳ Remaining:</span> ${remaining}s
-<span class="blue">🔧 Config:</span> Rate: ${rate}/s | Threads: ${threads} | Method: ${method}
-
-<span class="green">📊 Statistics:</span>
-<span class="green">    ✅ Success:</span> ${success}
-<span class="red">    ❌ Failed:</span> ${failed}
-<span class="blue">    📈 Total:</span> ${total}
-<span class="yellow">    ⚡ Rate:</span> ${(total / (elapsed || 1)).toFixed(2)} req/s
-<span class="green">    ✓ Success Rate:</span> ${successRate}%
-
-<span id="progressBar" class="blue">${progress}</span>
-        `;
-      }
-
-  intervalId = setInterval(() => {
-    const noCors = document.getElementById('noCors').checked; // Lấy trạng thái checkbox mới nhất tại mỗi lần gửi request
-
-    for (let i = 0; i < threads; i++) {
-      fetch(url, {
-        method: method,
-        mode: noCors ? 'no-cors' : 'cors',  // Sử dụng đúng trạng thái
-        headers: { 'Content-Type': 'application/json' },
-        body: method === 'POST' ? JSON.stringify({ test: "data" }) : null,
-	"User-Agent": "node"
-      })
-      .then(() => { success++; total++; })
-      .catch(() => { failed++; total++; });
-    }
-
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        logStats(elapsed);
-
-if (elapsed >= duration) {
-  clearInterval(intervalId);
-  intervalId = null;
-  stop();
-}
-      }, 1000 / rate);
-    }
-
-function stop() {
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = null;
-    const output = document.getElementById('output');
-    output.innerHTML += '\n\n[Đã dừng chạy]\n';
-  }
+function percentile(arr, p){
+  if (!arr.length) return 0;
+  const sorted = Array.from(arr).sort((a,b)=>a-b);
+  const idx = (p/100) * (sorted.length - 1);
+  if (Number.isInteger(idx)) return sorted[idx];
+  const lo = Math.floor(idx), hi = Math.ceil(idx);
+  return sorted[lo] + (sorted[hi]-sorted[lo]) * (idx-lo);
 }
 
-  </script>
+function updateOutput(){
+  const out = document.getElementById('output');
+  const s = state;
+  if (!s) { out.textContent = ''; return; }
+  const elapsed = Math.floor((Date.now() - s.startTime)/1000);
+  const remaining = Math.max(0, s.duration - elapsed);
+  const successRate = s.total>0 ? ((s.success/s.total)*100).toFixed(1) : '0.0';
+  const avgLatency = s.latencies.length ? (s.latencies.reduce((a,b)=>a+b,0)/s.latencies.length).toFixed(1) : 'n/a';
+  const p50 = s.latencies.length ? percentile(s.latencies,50).toFixed(1) : 'n/a';
+  const p95 = s.latencies.length ? percentile(s.latencies,95).toFixed(1) : 'n/a';
+  const p99 = s.latencies.length ? percentile(s.latencies,99).toFixed(1) : 'n/a';
 
+  // progress bar
+  const barLen = 40;
+  const pct = Math.min(elapsed / s.duration, 1);
+  const done = Math.round(barLen * pct);
+  const progress = '[' + '■'.repeat(done) + '□'.repeat(barLen - done) + ']';
+
+  out.innerHTML = `
+🎯 Target: ${s.url} : ${elapsed}s / ${s.duration}s
+⏳ Remaining: ${remaining}s
+🔧 Config: Rate: ${s.rate}/s | Threads: ${s.threads} | Method: ${s.method} | no-cors: ${s.noCors ? 'YES (no response info)' : 'NO'}
+
+📊 Statistics:
+    ✅ Success: ${s.success}
+    ❌ Failed: ${s.failed}
+    📈 Total: ${s.total}
+    ⚡ Rate (observed): ${(s.total / (elapsed || 1)).toFixed(2)} req/s
+    ✓ Success Rate: ${successRate}%
+
+Latency (ms): avg ${avgLatency} | p50 ${p50} | p95 ${p95} | p99 ${p99}
+
+${progress}
+  `.trim();
+}
+
+function start(){
+  if (running) { showAlert('Đang chạy rồi — dừng trước khi bắt đầu lại',2000); return; }
+
+  const url = (document.getElementById('url').value || '').trim();
+  if (!url){ showAlert('Nhập URL hợp lệ'); return; }
+
+  const rate = Math.max(1, Number(document.getElementById('rate').value) || 1);
+  const threads = Math.max(1, Number(document.getElementById('threads').value) || 1);
+  const duration = Math.max(1, Number(document.getElementById('duration').value) || 1);
+  const method = document.getElementById('method').value;
+  const noCors = document.getElementById('noCors').checked;
+
+  // init state
+  state = {
+    url, rate, threads, duration, method, noCors,
+    startTime: Date.now(),
+    total:0, success:0, failed:0,
+    latencies: [], // ms
+    events: [], // optional detailed events for export
+    tokens:0,
+    ongoing:0,
+    stopped:false
+  };
+
+  document.getElementById('currentUrl').textContent = '🔗 URL hiện tại: ' + url;
+  running = true;
+  showAlert('Bắt đầu test', 1200);
+
+  // Scheduler: add tokens at granularity = 100ms
+  const tickMs = 100;
+  const tokensPerTick = rate * (tickMs/1000);
+  state.schedulerInterval = setInterval(()=> {
+    if (!state || state.stopped) return;
+    state.tokens += tokensPerTick;
+    // try dispatch while tokens >=1 and concurrency allows
+    while (state.tokens >= 1 - 1e-9 && state.ongoing < threads) {
+      dispatchOne();
+      state.tokens -= 1;
+    }
+    // update output frequently
+    updateOutput();
+    // stop after duration
+    const elapsed = Math.floor((Date.now() - state.startTime)/1000);
+    if (elapsed >= duration) { stop(); }
+  }, tickMs);
+
+  // also update output every 500ms for UI smoothness
+  state.uiInterval = setInterval(updateOutput, 500);
+}
+
+function stop(){
+  if (!running) return;
+  if (!state) return;
+  state.stopped = true;
+  running = false;
+  clearInterval(state.schedulerInterval);
+  clearInterval(state.uiInterval);
+  // We allow ongoing fetches to finish; after a small timeout, finalize
+  setTimeout(()=> {
+    updateOutput();
+    showAlert('Đã dừng', 1500);
+  }, 200);
+}
+
+function dispatchOne(){
+  if (!state || state.stopped) return;
+  state.ongoing++;
+  const sstart = nowMs();
+  const url = state.url;
+  const opts = { method: state.method };
+  if (!state.noCors) opts.mode = 'cors';
+  else opts.mode = 'no-cors';
+
+  // Attempt to add JSON body if POST
+  if (state.method === 'POST') {
+    opts.headers = { 'Content-Type': 'application/json' };
+    try { opts.body = JSON.stringify({ ts: new Date().toISOString() }); } catch(e){}
+  }
+
+  // Note: in browsers you can't reliably set User-Agent; it is controlled by browser.
+  fetch(url, opts).then(response => {
+    const tend = nowMs();
+    state.total++;
+    state.ongoing--;
+    // If no-cors, response is opaque and we can't read status/body
+    if (state.noCors) {
+      // we only know request was dispatched — can't be sure about success
+      // record latency only
+      state.latencies.push(tend - sstart);
+      state.events.push({ t: new Date().toISOString(), status: 'opaque', latency: tend - sstart });
+    } else {
+      // we can check status
+      if (response.ok) {
+        state.success++;
+      } else {
+        state.failed++;
+      }
+      state.latencies.push(tend - sstart);
+      state.events.push({ t: new Date().toISOString(), status: response.status, latency: tend - sstart });
+    }
+  }).catch(err => {
+    const tend = nowMs();
+    state.total++;
+    state.failed++;
+    state.ongoing--;
+    state.latencies.push(tend - sstart);
+    state.events.push({ t: new Date().toISOString(), status: 'error', latency: tend - sstart, error: (err && err.message) ? err.message : String(err) });
+  });
+}
+
+function exportCSV(){
+  if (!state) { showAlert('Không có dữ liệu để xuất'); return; }
+  // Create CSV of events
+  const rows = [['timestamp','status','latency_ms','note']];
+  for (const e of state.events) {
+    rows.push([e.t || '', e.status || '', (e.latency||'').toString(), e.error ? e.error.replace(/\r?\n/g,' ') : '']);
+  }
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sload_export_${(new Date()).toISOString().replace(/[:.]/g,'-')}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showAlert('Đã xuất CSV', 1600);
+}
+
+</script>
 </body>
 </html>
