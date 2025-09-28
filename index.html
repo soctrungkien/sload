@@ -1,3 +1,4 @@
+<!--sload-->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -148,7 +149,7 @@ select, input[type="number"] {
   <style>
     body { background:#111; color:#eee; font-family: monospace; padding:20px; max-width:900px; margin:auto; }
     label,input,button,select,textarea { font-family:inherit; margin:6px 10px 6px 0; }
-    input,select,textarea { padding:6px; background:#222; border:1px solid #444; color:#fff; }
+    input,textarea { padding:6px; background:#222; border:1px solid #444; color:#fff; }
     input[type="text"]{ width:60%; }
     input[type="number"]{ width:100px; }
     button{ padding:8px 12px; background:#222; border:1px solid #444; color:#fff; cursor:pointer; }
@@ -252,20 +253,20 @@ function updateOutput(){
   const progress = '[' + '■'.repeat(done) + '□'.repeat(barLen - done) + ']';
 
   out.innerHTML = `
-🎯 Target: ${s.url} : ${elapsed}s / ${s.duration}s
-⏳ Remaining: ${remaining}s
-🔧 Config: Rate: ${s.rate}/s | Threads: ${s.threads} | Method: ${s.method} | no-cors: ${s.noCors ? 'YES (no response info)' : 'NO'}
+<span class="blue">🎯 Target:</span> ${s.url} : ${elapsed}s / ${s.duration}s
+<span class="blue">⏳ Remaining:</span> ${remaining}s
+<span class="blue">🔧 Config: Rate:</span> ${s.rate}/s | Threads: ${s.threads} | Method: ${s.method} | no-cors: ${s.noCors ? 'YES (no response info)' : 'NO'}
 
-📊 Statistics:
-    ✅ Success: ${s.success}
-    ❌ Failed: ${s.failed}
-    📈 Total: ${s.total}
-    ⚡ Rate (observed): ${(s.total / (elapsed || 1)).toFixed(2)} req/s
-    ✓ Success Rate: ${successRate}%
+<span class="green">📊 Statistics:</span>
+<span class="green">    ✅ Success:</span> ${s.success}
+<span class="red">    ❌ Failed:</span> ${s.failed}
+<span class="blue">    📈 Total:</span> ${s.total}
+<span class="yellow">    ⚡ Rate (observed):</span> ${(s.total / (elapsed || 1)).toFixed(2)} req/s
+<span class="green">    ✓ Success Rate:</span> ${successRate}%
 
 Latency (ms): avg ${avgLatency} | p50 ${p50} | p95 ${p95} | p99 ${p99}
 
-${progress}
+<span id="progressBar" class="blue">${progress}</span>
   `.trim();
 }
 
